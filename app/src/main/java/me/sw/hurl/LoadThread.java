@@ -32,7 +32,7 @@ public class LoadThread extends Thread {
 
 				reader.close();
 
-				EventBus.getDefault().post(new QuestionLoadedEvent(questions));
+				EventBus.getDefault().postSticky(new QuestionLoadedEvent(questions));
 			} catch (IOException e) {
 				Log.e(getClass().getSimpleName(), "Exception parsing JSON", e);
 			} finally {

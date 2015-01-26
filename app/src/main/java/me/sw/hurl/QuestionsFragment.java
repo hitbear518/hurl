@@ -3,34 +3,44 @@ package me.sw.hurl;
 import android.app.ListFragment;
 import android.os.Bundle;
 import android.text.Html;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
+import retrofit.Callback;
+import retrofit.RestAdapter;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 /**
  * Created by Sen on 1/25/2015.
  */
-public class QuestionsFragment extends ListFragment {
+public class QuestionsFragment extends ListFragment implements Callback<SOQuestions> {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setRetainInstance(true);
 
-		new LoadThread().start();
+		RestAdapter restAdapter = new RestAdapter.Builder()
+				.setEndpoint("https://api.stackexchange.com")
+				.build();
+		StackOverflowInterface so = restAdapter.create(StackOverflowInterface.class);
+		so.questions("android", this);
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
 
-		EventBus.getDefault().register(this);
+		EventBus.getDefault().registerSticky(this);
 	}
 
 	@Override
@@ -42,13 +52,24 @@ public class QuestionsFragment extends ListFragment {
 
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
-		Item item = ((ItemAdapter) getListAdapter()).getItem(position);
+		Item item = ((ItemsAdapter) getListAdapter()).getItem(position);
 
 		EventBus.getDefault().post(new QuestionClickedEvent(item));
 	}
 
 	public void onEventMainThread(QuestionLoadedEvent event) {
 		setListAdapter(new ItemsAdapter(event.questions.items));
+	}
+
+	@Override
+	public void success(SOQuestions soQuestions, Response response) {
+		setListAdapter(new ItemsAdapter(soQuestions.items));
+	}
+
+	@Override
+	public void failure(RetrofitError error) {
+		Toast.makeText(getActivity(), error.getMessage(), Toast.LENGTH_LONG).show();
+		Log.e(getClass().getSimpleName(), "Exception from retrofit request to StackOverflow", error);
 	}
 
 	class ItemsAdapter extends ArrayAdapter<Item> {

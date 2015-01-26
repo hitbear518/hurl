@@ -1,9 +1,13 @@
 package me.sw.hurl;
 
-import android.support.v7.app.ActionBarActivity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import de.greenrobot.event.EventBus;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -12,8 +16,29 @@ public class MainActivity extends ActionBarActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+
+		if (getFragmentManager().findFragmentById(android.R.id.content) == null) {
+			getFragmentManager().beginTransaction()
+					.add(android.R.id.content, new QuestionsFragment())
+					.commit();
+		}
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		EventBus.getDefault().register(this);
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		EventBus.getDefault().unregister(this);
+	}
+
+	public void onEventMainThread(QuestionClickedEvent event) {
+		startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(event.item.link)));
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
