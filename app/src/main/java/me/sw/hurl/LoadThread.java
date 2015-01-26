@@ -29,7 +29,6 @@ public class LoadThread extends Thread {
 				InputStream in = c.getInputStream();
 				BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 				SOQuestions questions = new Gson().fromJson(reader, SOQuestions.class);
-
 				reader.close();
 
 				EventBus.getDefault().postSticky(new QuestionLoadedEvent(questions));

@@ -7,9 +7,12 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -74,14 +77,21 @@ public class QuestionsFragment extends ListFragment implements Callback<SOQuesti
 
 	class ItemsAdapter extends ArrayAdapter<Item> {
 		ItemsAdapter(List<Item> items) {
-			super(getActivity(), android.R.layout.simple_list_item_1, items);
+			super(getActivity(), R.layout.row, R.id.title, items);
 		}
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			View row = super.getView(position, convertView, parent);
-			TextView title = (TextView) row.findViewById(android.R.id.text1);
 
+			Item item = getItem(position);
+
+			ImageView icon = (ImageView) row.findViewById(R.id.icon);
+			Picasso.with(getActivity()).load(item.owner.profileImage)
+					.placeholder(R.drawable.owner_placeholder)
+					.error(R.drawable.owner_error).into(icon);
+
+			TextView title = (TextView) row.findViewById(R.id.title);
 			title.setText(Html.fromHtml(getItem(position).title));
 
 			return row;

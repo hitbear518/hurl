@@ -6,6 +6,7 @@ package me.sw.hurl;
 public class Item {
 	String title;
 	String link;
+	Owner owner;
 
 	@Override
 	public String toString() {
